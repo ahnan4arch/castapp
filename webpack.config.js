@@ -4,7 +4,7 @@ const path = require('path');
 module.exports = {
   entry: './src/index.jsx',
   output: {
-    path: path.resolve(__dirname, 'js'),
+    path: path.resolve(__dirname, 'bundle'),
     filename: 'index.js'
   },
   resolve: {

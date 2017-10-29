@@ -1,7 +1,7 @@
 .PHONY: webpack start bukld open
 
 webpack:
-	rm -rf js/index.js
+	rm -rf bundle/index.js
 	npx webpack
 
 start:
