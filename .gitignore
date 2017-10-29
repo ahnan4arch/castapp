@@ -93,3 +93,4 @@ typings/
 
 /dist
 /.node-version
+/js

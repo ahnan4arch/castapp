@@ -1,3 +1,9 @@
+.PHONY: webpack start bukld open
+
+webpack:
+	rm -rf js/index.js
+	npx webpack
+
 start:
 	./node_modules/.bin/electron .
 

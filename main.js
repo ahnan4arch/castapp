@@ -9,9 +9,9 @@ let win
 function createWindow () {
   // Create the browser window.
   win = new BrowserWindow({
-    width: 800,
+    width: 1024,
     height: 600,
-    'min-width': 800,
+    'min-width': 1024,
     'min-height': 600,
     'accept-first-mouse': true,
     'title-bar-style': 'hidden'
@@ -25,7 +25,7 @@ function createWindow () {
   }));
 
   // Open the DevTools.
-  // win.webContents.openDevTools();
+  win.webContents.openDevTools();
 
   // Emitted when the window is closed.
   win.on('closed', () => {
