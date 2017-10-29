@@ -18,6 +18,7 @@
   "homepage": "https://github.com/umatoma/castapp#readme",
   "devDependencies": {
     "electron": "1.7.9",
-    "electron-packager": "^9.1.0"
+    "electron-packager": "^9.1.0",
+    "photon": "^2.0.0"
   }
 }
