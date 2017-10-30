@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { remote } from 'electron';
+import { remote, ipcRenderer } from 'electron';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import PageFiles from './PageFiles';
@@ -39,7 +39,10 @@ class App extends React.Component {
         directory={directory}
         parents={parents}
         files={files}
-        onCastFile={(file) => this.setState({ castingFile: file })}
+        onCastFile={(file) => {
+          ipcRenderer.send('cast-file', JSON.stringify({ path: file.path }));
+          this.setState({ castingFile: file });
+        }}
         onOpenDirectory={(directory) => {
           const parents = directory.parents();
           const files = directory.files();

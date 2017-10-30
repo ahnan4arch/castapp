@@ -1,4 +1,4 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const url = require('url');
 
@@ -60,3 +60,34 @@ app.on('activate', () => {
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
+
+const { URL } = require('url');
+const http = require('http');
+const send = require('send');
+const NodeCast = require('nodecast-js');
+const ip = require('ip');
+const random = (min, max) => Math.floor(Math.random() * (max - min) + min);
+
+ipcMain.on('cast-file', (event, arg) => {
+  const filePath = JSON.parse(arg).path;
+  const dirPath = path.dirname(filePath);
+  const fileName = path.basename(filePath);
+  const port = random(49152, 65535);
+
+  const server = require('http').createServer((req, res) => {
+    send(req, fileName, { root: dirPath }).pipe(res);
+  }).listen(port, () => {
+    const url = `http://${ip.address()}:${port}`;
+    console.log(url);
+
+    const nodeCast = new NodeCast();
+    nodeCast.onDevice(device => {
+      device.onError(err => {
+        console.log(err);
+      });
+      device.play(url);
+    });
+
+    nodeCast.start();
+  });
+});
