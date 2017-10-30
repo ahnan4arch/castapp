@@ -1,12 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-const WindowCasting = () => (
-  <div className="window">
-    <div className="window-content">
-      CASTING
-    </div>
+const PageCasting = ({ file }) => (
+  <div>
+    <div>{file.path}</div>
   </div>
 );
 
-export default WindowCasting;
+export default PageCasting;

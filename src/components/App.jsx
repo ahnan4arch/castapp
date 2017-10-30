@@ -11,35 +11,40 @@ class App extends React.Component {
   constructor() {
     super();
     this.state = {
-      selectedFile: null,
-      isCasting: false,
+      castingFile: null,
+      directory: null,
+      parents: [],
       files: []
     };
   }
 
-  componentDidMount() {
-    const moviesDir = path.resolve(remote.app.getPath('home'), 'Movies');
-    const files = fs.readdirSync(moviesDir)
-      .map(_path => path.resolve(moviesDir, _path))
-      .map(_path => new File(_path));
-    this.setState({ files });
+  componentWillMount() {
+    const directory = new File(path.resolve(remote.app.getPath('home'), 'Movies'));
+    const parents = directory.parents();
+    const files = directory.files();
+    this.setState({ directory, parents, files });
   }
 
   render() {
-    const { files, selectedFile, isCasting } = this.state;
+    const { directory, parents, files, castingFile } = this.state;
 
-    if (selectedFile && isCasting) {
+    if (castingFile) {
       return (
-        <PageCasting />
+        <PageCasting file={castingFile} />
       );
     }
 
     return (
       <PageFiles
+        directory={directory}
+        parents={parents}
         files={files}
-        selectedFile={selectedFile}
-        onCastFile={(file) => this.setState({ isCasting: true })}
-        onSelectFile={(file) => this.setState({ selectedFile: file })}
+        onCastFile={(file) => this.setState({ castingFile: file })}
+        onOpenDirectory={(directory) => {
+          const parents = directory.parents();
+          const files = directory.files();
+          this.setState({ directory, parents, files });
+        }}
       />
     );
   }

@@ -2,54 +2,123 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import Icon from './common/Icon';
 
-const WindowFiles = ({ selectedFile, files, onCastFile, onSelectFile }) => (
-  <div style={{ paddingTop: '1rem', marginBottom: '1rem' }}>
-    {files.map((file) => (
-      <article class="media" key={file.path} style={{
-        marginLeft: '1rem',
-        marginRight: '1rem',
-      }}>
-        <figure class="media-left">
-          <p class="image is-64x64">
-            <Icon type="folder" style={{
-              fontSize: 32,
-              width: 64,
-              height: 64,
-              background: '#ddd',
-              color: '#fff',
-              borderRadius: 32,
-            }} />
-          </p>
-        </figure>
-        <div class="media-content">
-          <div class="content">
-            <div>
-              <strong>{file.basename}</strong>
-            </div>
-            <div>{file.size()} Byte</div>
-          </div>
-          <nav class="level">
-            <div class="level-left">
-              <a class="level-item">
-                <Icon type="reply" className="is-small" />
-              </a>
-              <a class="level-item">
-                <Icon type="retweet" className="is-small" />
-              </a>
-              <a class="level-item">
-                <Icon type="heart" className="is-small" />
-              </a>
-            </div>
-          </nav>
-        </div>
-        <div class="media-right">
-          <a href="#">
-            <Icon type="heart" className="is-small" />
-          </a>
-        </div>
-      </article>
-    ))}
-  </div>
+const Breadcrumb = ({ parents, onOpenDirectory }) => (
+  <nav
+    className="breadcrumb has-succeeds-separator"
+    style={{
+      paddingLeft: '1rem',
+      paddingRight: '1rem',
+      marginBottom: 0
+    }}
+  >
+    <ul>
+      {parents.map((dir) => (
+        <li key={dir.path}>
+          <a href="#" onClick={() => onOpenDirectory(dir)}>{dir.path}</a>
+        </li>
+      ))}
+    </ul>
+  </nav>
 );
+
+const Title = ({ directory }) => (
+  <h1
+    className="title"
+    style={{
+      paddingLeft: '1rem',
+      paddingRight: '1rem',
+      marginBottom: 0,
+    }}
+  >
+    {directory.basename}
+  </h1>
+);
+
+const FolderIcon = (props) => (
+  <Icon
+    {...props}
+    type="folder"
+    style={{
+      fontSize: 32,
+      width: 64,
+      height: 64,
+      background: 'hsl(0, 0%, 96%)',
+      color: 'hsl(0, 0%, 21%)',
+      borderRadius: 32,
+      cursor: 'pointer',
+    }}
+  />
+);
+
+const PlayIcon = (props) => (
+  <Icon
+    {...props}
+    type="play"
+    style={{
+      fontSize: 32,
+      width: 64,
+      height: 64,
+      background: 'hsl(0, 0%, 96%)',
+      color: 'hsl(217, 71%, 53%)',
+      borderRadius: 32,
+      cursor: 'pointer',
+    }}
+  />
+);
+
+const WindowFiles = ({
+  directory,
+  parents,
+  files,
+  onCastFile,
+  onOpenDirectory
+}) => {
+  if (files.length === 0) {
+    return (
+      <div>
+        <Breadcrumb parents={parents} onOpenDirectory={onOpenDirectory} />
+        <Title directory={directory} />
+        <div style={{ padding: '1rem 1rem 0 1rem', marginBottom: '1rem' }}>
+          <div className="notification">
+            Empty files
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <Breadcrumb parents={parents} onOpenDirectory={onOpenDirectory} />
+      <Title directory={directory} />
+      <div style={{ paddingTop: '1rem', marginBottom: '1rem' }}>
+        {files.map((file) => (
+          <article className="media" key={file.path} style={{
+            marginLeft: '1rem',
+            marginRight: '1rem',
+          }}>
+            <figure className="media-left">
+              <p className="image is-64x64">
+                {file.isDirectory() ? (
+                  <FolderIcon onClick={() => onOpenDirectory(file)} />
+                ) : (
+                  <PlayIcon onClick={() => onCastFile(file)} />
+                )}
+              </p>
+            </figure>
+            <div className="media-content">
+              <div className="content">
+                <div>
+                  <strong>{file.basename}</strong>
+                </div>
+                <div>{file.size()} Byte</div>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 export default WindowFiles;
