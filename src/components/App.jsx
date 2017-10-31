@@ -4,18 +4,38 @@ import { remote, ipcRenderer } from 'electron';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import PageFiles from './PageFiles';
-import PageCasting from './PageCasting';
+import PageDeviceSelect from './PageDeviceSelect';
 import File from '../libs/File';
 
 class App extends React.Component {
   constructor() {
     super();
     this.state = {
-      castingFile: null,
       directory: null,
       parents: [],
-      files: []
+      files: [],
+      devices: [],
+      castFile: null,
+      castDevice: null,
     };
+
+    ipcRenderer.on('devices-update', (event, message) => {
+      // device {
+      //   "host":"192.168.0.100",
+      //   "name":"BRAVIA KJ-40W700C",
+      //   "xml":"http://192.168.0.100:52323/dmr.xml",
+      //   "type":"upnp"
+      // }
+      const { devices } = JSON.parse(message);
+      this.setState({ devices });
+    });
+    ipcRenderer.on('server-ready', (event, message) => {
+
+    });
+  }
+
+  componentDidMount() {
+    ipcRenderer.send('search-devices');
   }
 
   componentWillMount() {
@@ -26,11 +46,42 @@ class App extends React.Component {
   }
 
   render() {
-    const { directory, parents, files, castingFile } = this.state;
+    const { directory, parents, files, devices, castFile, castDevice } = this.state;
 
-    if (castingFile) {
+    if (castDevice && castFile) {
       return (
-        <PageCasting file={castingFile} />
+        <div>
+          <button
+            className="button"
+            onClick={() => {
+              ipcRenderer.send(
+                'stop-cast',
+                JSON.stringify({ deviceName: castDevice.name })
+              );
+              this.setState({ castFile: null, castDevice: null });
+            }}
+          >
+            stop
+          </button>
+        </div>
+      );
+    }
+
+    if (castFile) {
+      return (
+        <PageDeviceSelect
+          devices={devices}
+          file={castFile}
+          onSelectDevice={(device) => {
+            this.setState({ castDevice: device }, () => {
+              ipcRenderer.send(
+                'cast-file',
+                JSON.stringify({ filePath: castFile.path, deviceName: device.name })
+              );
+            });
+          }}
+          onCancel={() => this.setState({ castFile: null })}
+        />
       );
     }
 
@@ -39,10 +90,7 @@ class App extends React.Component {
         directory={directory}
         parents={parents}
         files={files}
-        onCastFile={(file) => {
-          ipcRenderer.send('cast-file', JSON.stringify({ path: file.path }));
-          this.setState({ castingFile: file });
-        }}
+        onCastFile={(file) => this.setState({ castFile: file })}
         onOpenDirectory={(directory) => {
           const parents = directory.parents();
           const files = directory.files();

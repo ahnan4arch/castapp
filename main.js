@@ -1,10 +1,17 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const url = require('url');
+const http = require('http');
+const send = require('send');
+const NodeCast = require('nodecast-js');
+const ip = require('ip');
+const random = (min, max) => Math.floor(Math.random() * (max - min) + min);
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
-let win
+let win;
+let searchDeviceTimeout;
+const nodeCast = new NodeCast();
 
 function createWindow () {
   // Create the browser window.
@@ -34,6 +41,23 @@ function createWindow () {
     // when you should delete the corresponding element.
     win = null
   })
+
+  nodeCast.onDevice((device) => {
+    win.webContents.send(
+      'devices-update',
+      JSON.stringify({ devices: nodeCast.getList() })
+    );
+
+    device.onError(err => {
+      win.webContents.send(
+        'devices-update',
+        JSON.stringify({ devices: nodeCast.getList() })
+      );
+    });
+  });
+  ipcMain.on('search-devices', () => {
+    nodeCast.start();
+  });
 }
 
 // This method will be called when Electron has finished
@@ -61,15 +85,8 @@ app.on('activate', () => {
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
 
-const { URL } = require('url');
-const http = require('http');
-const send = require('send');
-const NodeCast = require('nodecast-js');
-const ip = require('ip');
-const random = (min, max) => Math.floor(Math.random() * (max - min) + min);
-
-ipcMain.on('cast-file', (event, arg) => {
-  const filePath = JSON.parse(arg).path;
+ipcMain.on('cast-file', (event, message) => {
+  const { filePath, deviceName } = JSON.parse(message);
   const dirPath = path.dirname(filePath);
   const fileName = path.basename(filePath);
   const port = random(49152, 65535);
@@ -78,16 +95,13 @@ ipcMain.on('cast-file', (event, arg) => {
     send(req, fileName, { root: dirPath }).pipe(res);
   }).listen(port, () => {
     const url = `http://${ip.address()}:${port}`;
-    console.log(url);
-
-    const nodeCast = new NodeCast();
-    nodeCast.onDevice(device => {
-      device.onError(err => {
-        console.log(err);
-      });
-      device.play(url);
-    });
-
-    nodeCast.start();
+    const device = nodeCast.getList().find((d) => d.name === deviceName);
+    device.play(url);
   });
+});
+
+ipcMain.on('stop-cast', (event, message) => {
+  const { deviceName } = JSON.parse(message);
+  const device = nodeCast.getList().find((d) => d.name === deviceName);
+  device.stop();
 });
