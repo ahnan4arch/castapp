@@ -7,7 +7,7 @@ webpack:
 start:
 	./node_modules/.bin/electron .
 
-build:
+build: webpack
 	./node_modules/.bin/electron-packager . castapp \
 		--platform=darwin --arch=x64 \
 		--asar \

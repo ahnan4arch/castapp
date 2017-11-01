@@ -5,6 +5,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import PageFiles from './PageFiles';
 import PageDeviceSelect from './PageDeviceSelect';
+import PageCasting from './PageCasting';
 import File from '../libs/File';
 
 class App extends React.Component {
@@ -29,8 +30,8 @@ class App extends React.Component {
       const { devices } = JSON.parse(message);
       this.setState({ devices });
     });
-    ipcRenderer.on('server-ready', (event, message) => {
-
+    ipcRenderer.on('cast-stop', (event, message) => {
+      this.setState({ castFile: null, castDevice: null });
     });
   }
 
@@ -50,20 +51,16 @@ class App extends React.Component {
 
     if (castDevice && castFile) {
       return (
-        <div>
-          <button
-            className="button"
-            onClick={() => {
-              ipcRenderer.send(
-                'stop-cast',
-                JSON.stringify({ deviceName: castDevice.name })
-              );
-              this.setState({ castFile: null, castDevice: null });
-            }}
-          >
-            stop
-          </button>
-        </div>
+        <PageCasting
+          device={castDevice}
+          file={castFile}
+          onCancel={() => {
+            ipcRenderer.send(
+              'stop-cast',
+              JSON.stringify({ deviceName: castDevice.name })
+            );
+          }}
+        />
       );
     }
 

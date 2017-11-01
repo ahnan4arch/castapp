@@ -27,7 +27,7 @@
   },
   "dependencies": {
     "ip": "^1.1.5",
-    "nodecast-js": "^1.0.3",
+    "nodecast-js": "git://github.com/umatoma/nodecast-js.git",
     "react": "^16.0.0",
     "react-dom": "^16.0.0",
     "send": "^0.16.1"

@@ -21,7 +21,7 @@ const Breadcrumb = ({ parents, onOpenDirectory }) => (
   </nav>
 );
 
-const Title = ({ directory }) => (
+const Title = () => (
   <h1
     className="title"
     style={{
@@ -30,7 +30,7 @@ const Title = ({ directory }) => (
       marginBottom: 0,
     }}
   >
-    {directory.basename}
+    Files
   </h1>
 );
 
@@ -77,7 +77,7 @@ const WindowFiles = ({
     return (
       <div>
         <Breadcrumb parents={parents} onOpenDirectory={onOpenDirectory} />
-        <Title directory={directory} />
+        <Title />
         <div style={{ padding: '1rem 1rem 0 1rem', marginBottom: '1rem' }}>
           <div className="notification">
             Empty files

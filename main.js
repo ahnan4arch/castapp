@@ -32,7 +32,9 @@ function createWindow () {
   }));
 
   // Open the DevTools.
-  win.webContents.openDevTools();
+  if (process.env.OPEN_DEV_TOOL === '1') {
+    win.webContents.openDevTools();
+  }
 
   // Emitted when the window is closed.
   win.on('closed', () => {
@@ -85,18 +87,32 @@ app.on('activate', () => {
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
 
+let server;
+
 ipcMain.on('cast-file', (event, message) => {
   const { filePath, deviceName } = JSON.parse(message);
   const dirPath = path.dirname(filePath);
   const fileName = path.basename(filePath);
   const port = random(49152, 65535);
 
-  const server = require('http').createServer((req, res) => {
+  server = require('http').createServer((req, res) => {
     send(req, fileName, { root: dirPath }).pipe(res);
   }).listen(port, () => {
     const url = `http://${ip.address()}:${port}`;
     const device = nodeCast.getList().find((d) => d.name === deviceName);
     device.play(url);
+    device._player.on('loading', () => {
+      console.log('loading');
+    });
+    device._player.on('playing', () => {
+      console.log('playing');
+    });
+    device._player.on('paused', () => {
+      console.log('paused');
+    });
+    device._player.on('stopped', () => {
+      console.log('stopped');
+    });
   });
 });
 
@@ -104,4 +120,9 @@ ipcMain.on('stop-cast', (event, message) => {
   const { deviceName } = JSON.parse(message);
   const device = nodeCast.getList().find((d) => d.name === deviceName);
   device.stop();
+  setTimeout(() => {
+    server.close(() => {
+      event.sender.send('cast-stop');
+    });
+  }, 200);
 });
