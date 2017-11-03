@@ -34,6 +34,18 @@ const Title = () => (
   </h1>
 );
 
+const RefreshIcon = (props) => (
+  <Icon
+    {...props}
+    type="refresh"
+    style={{
+      marginRight: '1rem',
+      color: 'hsl(217, 71%, 53%)',
+      cursor: 'pointer',
+    }}
+  />
+);
+
 const FolderIcon = (props) => (
   <Icon
     {...props}
@@ -70,6 +82,7 @@ const WindowFiles = ({
   directory,
   parents,
   files,
+  onRefresh,
   onCastFile,
   onOpenDirectory
 }) => {
@@ -91,6 +104,10 @@ const WindowFiles = ({
     <div>
       <Breadcrumb parents={parents} onOpenDirectory={onOpenDirectory} />
       <Title directory={directory} />
+      <RefreshIcon
+        className="pull-right"
+        onClick={onRefresh}
+      />
       <div style={{ paddingTop: '1rem', marginBottom: '1rem' }}>
         {files.map((file) => (
           <article className="media" key={file.path} style={{

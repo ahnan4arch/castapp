@@ -40,7 +40,12 @@ class App extends React.Component {
   }
 
   componentWillMount() {
-    const directory = new File(path.resolve(remote.app.getPath('home'), 'Movies'));
+    const moviesPath = path.resolve(remote.app.getPath('home'), 'Movies');
+    const directory = new File(moviesPath);
+    this.loadDirectoryFiles(directory);
+  }
+
+  loadDirectoryFiles(directory) {
     const parents = directory.parents();
     const files = directory.files();
     this.setState({ directory, parents, files });
@@ -87,12 +92,9 @@ class App extends React.Component {
         directory={directory}
         parents={parents}
         files={files}
+        onRefresh={() => this.loadDirectoryFiles(directory)}
         onCastFile={(file) => this.setState({ castFile: file })}
-        onOpenDirectory={(directory) => {
-          const parents = directory.parents();
-          const files = directory.files();
-          this.setState({ directory, parents, files });
-        }}
+        onOpenDirectory={this.loadDirectoryFiles.bind(this)}
       />
     );
   }

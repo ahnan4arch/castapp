@@ -1,5 +1,8 @@
 .PHONY: webpack start bukld open
 
+install:
+	npm install
+
 webpack:
 	rm -rf bundle/index.js
 	npx webpack
